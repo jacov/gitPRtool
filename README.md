@@ -7,10 +7,10 @@ For example, a team lead might want to see open pull requests for some or all of
 
 ## Simplest Install...one liner
 * Download and run gitPRtool.sh in your git code repo
-	`
+	```
 	# cd <path_to_git_repo>
 	wget https://raw.githubusercontent.com/jacov/gitPRtool/master/gitPRtool.sh && chmod +x gitPRtool.sh && ./gitPRtool.sh		
-	` 
+	``` 
 
 ## More methods:
 * you can clone the repo
@@ -20,15 +20,15 @@ For example, a team lead might want to see open pull requests for some or all of
 ## Customizations:
 * To make the script aware of your code authors, modify the KNOWN_AUTHORS variable, ex:
 
-`
+```
 #--# KNOWN_AUTHORS :: PLEASE CHANGE ME
 #--# 	Known Code Author Filter Overrides
 #--# 	you can hard code a list of comman seperated users to filter on
 export KNOWN_AUTHORS="michael,gabriel,rafael,jacob"
-`
+```
 
 ## USAGE:
-`
+```
 
 	USAGE:
 		./gitPRtool.sh ALL
@@ -37,10 +37,10 @@ export KNOWN_AUTHORS="michael,gabriel,rafael,jacob"
 	EX:
 
 		./gitPRtool.sh bob
-`
+```
 
 
 
-### By: Jacob Baloul
-### Created: April 10, 2018
+#### By: Jacob Baloul
+#### Created: April 10, 2018
  
