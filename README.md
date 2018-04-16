@@ -8,14 +8,33 @@ For example, a team lead might want to see open pull requests for some or all of
 ## Simplest Install...
 * Download and run gitPRtool.sh 
 	```
-	# cd <path_to_git_repo>
+	#1.# cd <path_to_git_repo>
+
+	#2.# Download
 	wget https://raw.githubusercontent.com/jacov/gitPRtool/master/gitPRtool.sh && chmod +x gitPRtool.sh 
 	wget https://raw.githubusercontent.com/jacov/gitPRtool/master/gitPRtool.conf && chmod +x gitPRtool.conf 
-	# Modify gitPRtool.conf, ex: vim gitPRtool.conf
+
+	#3.# Modify gitPRtool.conf, ex: vim gitPRtool.conf
+
+	#4.# Run
 	./gitPRtool.sh		
 	``` 
 
-## More methods:
+## Dependancies
+* Currently we depend on just curl & jq :: https://github.com/stedolan/jq
+* If you do not have jq, please download via one of the following commands for your OS:
+```
+	brew install jq
+	brew install curl
+	
+	apt-get install jq
+
+	yum install jq
+	
+```
+
+
+## More install methods:
 * you can clone the repo
 * you can download into your executable $PATH ,ex /bin and then run from anywhere on any repo
 
