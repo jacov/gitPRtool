@@ -14,7 +14,6 @@
 #--# KNOWN_AUTHORS :: PLEASE CHANGE ME
 #--# 	Known Code Author Filter Overrides
 #--# 	you can hard code a list of comman seperated users to filter on
-export KNOWN_AUTHORS="michael,gabriel,rafael,jacob"
 #--# export KNOWN_AUTHORS="scott,erik,jacob"
 
 
@@ -42,6 +41,106 @@ git show --pretty=short --name-only FETCH_HEAD
 check_error
   echo ;
   echo "########"
+}
+##################################################
+function reportPR() {
+
+ARG=$1
+
+# convert csv to regex
+export known_code_authors_regex=$(echo "$KNOWN_AUTHORS" | sed -e 's/,/|/g')
+
+
+# curl https://api.github.com/repos/:owner/:repo/pulls
+
+# Public or Private
+if test "$GIT_AUTH_USERNAME" != ''
+then
+	# Private
+	# export PULLS_JSON=$(curl -s -u ${GIT_AUTH_USERNAME}:${GIT_AUTH_PASSWORD} "https://api.github.com/repos/${GIT_REPO_OWNER}/${GIT_REPO}/pulls?state=open")
+	curl -s -u ${GIT_AUTH_USERNAME}:${GIT_AUTH_PASSWORD} "https://api.github.com/repos/${GIT_REPO_OWNER}/${GIT_REPO}/pulls?state=open" -o tmp_pulls.json
+	check_error
+else
+	# Public
+	# export PULLS_JSON=$(curl -s "https://api.github.com/repos/${GIT_REPO_OWNER}/${GIT_REPO}/pulls?state=open")
+	curl -s "https://api.github.com/repos/${GIT_REPO_OWNER}/${GIT_REPO}/pulls?state=open" -o tmp_pulls.json
+	check_error
+fi
+
+# MAP DATA
+# export PULL_ID=$(echo "$PULLS_JSON" | jq ".[].id" )
+#export PULL_URL=$(echo "$PULLS_JSON" | jq ".[].url")
+#export PULL_NUM=$(echo "$PULLS_JSON" | jq ".[].number")
+#export PULL_LOGIN=$(echo "$PULLS_JSON" | jq ".[].user.login")
+
+export pointer=0
+# echo "$PULLS_JSON" | jq ".[].id" | while read pull_id 
+# curl -s -u ${GIT_AUTH_USERNAME}:${GIT_AUTH_PASSWORD} "https://api.github.com/repos/${GIT_REPO_OWNER}/${GIT_REPO}/pulls?state=open" | jq ".[].id" | while read pull_id 
+cat tmp_pulls.json | jq ".[].id" | while read pull_id
+do
+
+	single_pull_num=$(cat tmp_pulls.json | jq ".[$pointer].number")
+	single_pull_login=$(cat tmp_pulls.json | jq ".[$pointer].user.login")
+	single_pull_url=$(cat tmp_pulls.json | jq ".[$pointer].url")
+	
+	
+	# filter on login
+	if test "$USER_FILTER" != ''
+	then
+		export user_filter=$(echo "$USER_FILTER" | tr [:upper:] [:lower:])
+		if test "$user_filter" = "all"
+		then
+			print_report "$single_pull_num" "$single_pull_login" "$single_pull_url"	
+			check_error
+
+		elif test "$user_filter" = "known"
+		then
+			echo "$single_pull_login" | grep -iE "$known_code_authors_regex"
+			if test $? -eq 0
+			then
+				print_report "$single_pull_num" "$single_pull_login" "$single_pull_url"	
+				check_error
+			fi
+
+		else
+			echo "$single_pull_login" | grep -i "$user_filter"
+			if test $? -eq 0
+			then
+				print_report "$single_pull_num" "$single_pull_login" "$single_pull_url"	
+				check_error
+			fi
+		fi 
+		
+	fi
+
+
+	pointer=$(echo $[$pointer+1])
+
+check_error
+
+done
+
+}
+##################################################
+function print_report(){
+
+single_pull_num=$1
+single_pull_login=$2
+single_pull_url=$3
+
+# FINAL OUTPUT
+echo "
+Pull Request #$single_pull_num
+
+Author: $single_pull_login
+
+URL: $single_pull_url
+
+
+########
+"
+
+
 }
 ##################################################
 function check_error(){
@@ -74,9 +173,6 @@ then
 exit 1
 fi
 
-# convert csv to regex
-export known_code_authors_regex=$(echo "$KNOWN_AUTHORS" | sed -e 's/,/|/g')
-
 echo "
 
 checking all outstanding pull requests, this may take some time depending on number of PR's,
@@ -84,45 +180,16 @@ please wait...
 
 "
 
+source gitPRtool.conf
+check_error
+# export GIT_REPO_OWNER='someorg'
+# export GIT_REPO='somerepo'
+# export GIT_AUTH_USERNAME='jacov'
+# export GIT_AUTH_PASSWORD='XXXXXX'
 
-git ls-remote origin 'pull/*/head' | awk '{print $2}' | while read ref
-do
-  pr=$(echo $ref | cut -d/ -f3)
-  git fetch origin $ref >/dev/null 2>&1
-  check_error
-
-	if test "$USER_FILTER" != ''
-	then
-		export user_filter=$(echo "$USER_FILTER" | tr [:upper:] [:lower:])
-		if test "$user_filter" = "all"
-		then
-			export code_author=$(git show --pretty=format:'%an' --name-only FETCH_HEAD )
-			reportPR "$pr" "$code_author"
-			check_error
-
-		elif test "$user_filter" = "known"
-		then
-			export code_author=$(git show --pretty=format:'%an' --name-only FETCH_HEAD | grep -iE "$known_code_authors_regex")
-			if test "$code_author" != ''
-			then
-				reportPR "$pr" "$code_author"
-				check_error
-			fi
-
-		else
-			export code_author=$(git show --pretty=format:'%an' --name-only FETCH_HEAD | grep -i "$user_filter")
-			if test "$code_author" != ''
-			then
-				reportPR "$pr" "$code_author"
-				check_error
-			fi
-		fi 
-		
-	fi
+reportPR
 
 
-
-done
 ##
 ## END
 ## 
