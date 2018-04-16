@@ -8,15 +8,13 @@ For example, a team lead might want to see open pull requests for some or all of
 ## Simplest Install...
 * Download and run gitPRtool.sh 
 	```
-	#1.# cd <path_to_git_repo>
-
-	#2.# Download
+	#1.# Download
 	wget https://raw.githubusercontent.com/jacov/gitPRtool/master/gitPRtool.sh && chmod +x gitPRtool.sh 
 	wget https://raw.githubusercontent.com/jacov/gitPRtool/master/gitPRtool.conf && chmod +x gitPRtool.conf 
 
-	#3.# Modify gitPRtool.conf, ex: vim gitPRtool.conf
+	#2.# Modify gitPRtool.conf, ex: vim gitPRtool.conf
 
-	#4.# Run
+	#3.# Run
 	./gitPRtool.sh		
 	``` 
 
